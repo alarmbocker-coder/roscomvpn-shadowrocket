@@ -70,17 +70,42 @@ IP_RULES = [
     ("private",   "geoip", "DIRECT", "private-ips.list",   True),
     # whitelist: специфичные IP сервисов — тоже no-resolve
     ("whitelist", "geoip", "DIRECT", "whitelist-ips.list",  True),
-    # direct: ~35k РФ+BY CIDR — БЕЗ no-resolve, чтобы резолвить домены
-    # (именно это позволяет sberbank.ru и другим РФ-доменам идти DIRECT)
+    # direct: ~35k РФ+BY CIDR — страховка для приложений коннектящихся по IP напрямую
+    # (для доменных соединений не работает — Shadowrocket не резолвит домены при rule lookup)
     ("direct",    "geoip", "DIRECT", "direct-ips.list",    False),
 ]
 
-# ─── ручные DIRECT-домены (отсутствующие в roscomvpn-geosite) ──────────────
-# Добавляй сюда домены, которые roscomvpn не покрывает, но должны идти DIRECT
-MANUAL_DIRECT_DOMAINS = [
-    "sberbank.ru",  # ни sberbank.ru, ни sber.ru нет в roscomvpn-geosite
-    "sber.ru",
+# ─── plain-URL источники (обычные текстовые списки доменов, не geosite) ─────
+# Формат: (url, action, output_filename)
+# Каждая строка источника — просто домен без префикса, конвертируется в DOMAIN-SUFFIX
+PLAIN_URL_RULES = [
+    # 2633⭐ hxehex/russia-mobile-internet-whitelist — живой список российских
+    # сервисов (Сбербанк, Госуслуги, Почта, РЖД, ВКонтакте и др.),
+    # обновляется ежедневно. Решает проблему доменов отсутствующих в roscomvpn-geosite.
+    (
+        "https://raw.githubusercontent.com/hxehex/russia-mobile-internet-whitelist/main/whitelist.txt",
+        "DIRECT",
+        "hxehex-whitelist.list",
+    ),
 ]
+
+# ─── парсер plain-text доменных списков ─────────────────────────────────────
+
+def fetch_plain_domains(url: str) -> list[str]:
+    """Загружает plain-text список доменов (по одному на строку) и конвертирует
+    каждый в DOMAIN-SUFFIX для Shadowrocket RULE-SET формата."""
+    r = requests.get(url, timeout=30)
+    if r.status_code != 200:
+        print(f"  WARN: {url} → HTTP {r.status_code}")
+        return []
+    lines = []
+    for raw in r.text.splitlines():
+        domain = raw.strip()
+        if not domain or domain.startswith("#"):
+            continue
+        if re.match(r"^[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,}$", domain):
+            lines.append(f"DOMAIN-SUFFIX,{domain}")
+    return lines
 
 # ─── парсер geosite source-формата ───────────────────────────────────────────
 
@@ -230,12 +255,13 @@ update-url = {CONF_URL}
         else:
             rule_lines.append(f"RULE-SET,{url},{act}")
 
-    # ── 3.5. Ручные DIRECT-домены (не покрытые roscomvpn-geosite) ─────────────
-    if MANUAL_DIRECT_DOMAINS:
+    # ── 3.5. Plain-URL источники (hxehex и др.) ─────────────────────────────
+    if PLAIN_URL_RULES:
         rule_lines.append("")
-        rule_lines.append("# ── Ручные DIRECT-домены (не покрытые roscomvpn-geosite) ──")
-        for domain in MANUAL_DIRECT_DOMAINS:
-            rule_lines.append(f"DOMAIN-SUFFIX,{domain},DIRECT")
+        rule_lines.append("# ── Дополнительные DIRECT-домены (не покрытые roscomvpn-geosite) ──")
+        for _, _, outfile in PLAIN_URL_RULES:
+            list_url = f"{RAW_BASE}/{outfile}"
+            rule_lines.append(f"RULE-SET,{list_url},DIRECT")
 
     # ── 4. GEOIP catch-all для РФ/BY доменов не попавших в списки ────────────
     rule_lines.append("")
@@ -296,6 +322,17 @@ def main():
             entries,
             f"https://github.com/hydraponique/roscomvpn-geoip/blob/master/release/text/{name}.txt"
         )
+
+    # 2.5 Генерируем plain-URL списки (hxehex и др.)
+    if PLAIN_URL_RULES:
+        print("\n── Plain-URL domain lists ─────────────────────────────")
+        for src_url, _, outfile in PLAIN_URL_RULES:
+            print(f"  Fetching {src_url}...")
+            entries = fetch_plain_domains(src_url)
+            if not entries:
+                print(f"  SKIP: {outfile} (empty)")
+                continue
+            write_list(outfile, entries, src_url)
 
     # 3. Генерируем .conf
     print("\n── Генерация roscomvpn.conf ───────────────────────────")
