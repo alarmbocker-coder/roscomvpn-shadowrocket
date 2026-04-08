@@ -75,6 +75,13 @@ IP_RULES = [
     ("direct",    "geoip", "DIRECT", "direct-ips.list",    False),
 ]
 
+# ─── ручные DIRECT-домены (отсутствующие в roscomvpn-geosite) ──────────────
+# Добавляй сюда домены, которые roscomvpn не покрывает, но должны идти DIRECT
+MANUAL_DIRECT_DOMAINS = [
+    "sberbank.ru",  # ни sberbank.ru, ни sber.ru нет в roscomvpn-geosite
+    "sber.ru",
+]
+
 # ─── парсер geosite source-формата ───────────────────────────────────────────
 
 def fetch_geosite(category: str) -> list[str]:
@@ -222,6 +229,13 @@ update-url = {CONF_URL}
             rule_lines.append(f"RULE-SET,{url},{act},no-resolve")
         else:
             rule_lines.append(f"RULE-SET,{url},{act}")
+
+    # ── 3.5. Ручные DIRECT-домены (не покрытые roscomvpn-geosite) ─────────────
+    if MANUAL_DIRECT_DOMAINS:
+        rule_lines.append("")
+        rule_lines.append("# ── Ручные DIRECT-домены (не покрытые roscomvpn-geosite) ──")
+        for domain in MANUAL_DIRECT_DOMAINS:
+            rule_lines.append(f"DOMAIN-SUFFIX,{domain},DIRECT")
 
     # ── 4. GEOIP catch-all для РФ/BY доменов не попавших в списки ────────────
     rule_lines.append("")
