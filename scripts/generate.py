@@ -19,7 +19,7 @@ OUTPUT_DIR  = os.path.join(os.path.dirname(__file__), "..", "lists")
 CONF_PATH   = os.path.join(os.path.dirname(__file__), "..", "roscomvpn.conf")
 
 # GitHub username подставляется через env-переменную GITHUB_REPO (owner/repo)
-GITHUB_REPO = os.environ.get("GITHUB_REPO", "<YOUR_GITHUB_USERNAME>/roscomvpn-shadowrocket")
+GITHUB_REPO = os.environ.get("GITHUB_REPO", "forg-lib-lov/roscomvpn-shadowrocket")
 RAW_BASE    = f"https://raw.githubusercontent.com/{GITHUB_REPO}/main/lists"
 CONF_URL    = f"https://raw.githubusercontent.com/{GITHUB_REPO}/main/roscomvpn.conf"
 
