@@ -1,0 +1,16 @@
+# Discord App & Web
+DOMAIN-SUFFIX,discord.com
+DOMAIN-SUFFIX,discord.net
+DOMAIN-SUFFIX,discord.gg
+DOMAIN-SUFFIX,discord.media
+DOMAIN-SUFFIX,discordapp.com
+DOMAIN-SUFFIX,discordapp.net
+
+# Discord Status & Support
+DOMAIN-SUFFIX,discordstatus.com
+
+# Discord CDN (картинки и вложения)
+DOMAIN-SUFFIX,discord-attachments-uploads-production.s3.us-west-2.amazonaws.com
+
+# Универсальное правило по ключевому слову
+DOMAIN-KEYWORD,discord
