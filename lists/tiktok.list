@@ -1,25 +1,16 @@
-# --- Основные домены приложения и веб-версии ---
-DOMAIN-SUFFIX,tiktok.com
-DOMAIN-SUFFIX,tiktokv.com
-DOMAIN-SUFFIX,tiktokcdn.com
-DOMAIN-SUFFIX,tiktokcdn-us.com
-DOMAIN-SUFFIX,byteoversea.com
-DOMAIN-SUFFIX,ibytedtos.com
-DOMAIN-SUFFIX,ipstatp.com
-DOMAIN-SUFFIX,muscdn.com
-DOMAIN-SUFFIX,musical.ly
-
-# --- Служебные домены авторизации, аналитики и CDN холдинга ---
-DOMAIN-SUFFIX,amemv.com
-DOMAIN-SUFFIX,bdurl.net
-DOMAIN-SUFFIX,bytedance.com
-DOMAIN-SUFFIX,bytedance.net
-DOMAIN-SUFFIX,bytedmod.com
-DOMAIN-SUFFIX,pstatp.com
-DOMAIN-SUFFIX,snssdk.com
-DOMAIN-SUFFIX,toutiao.com
-
-# --- Жесткий перехват по ключевым словам (для поддоменов) ---
+# --- Жесткий перехват по ключевым словам ---
+# (Захватит tiktokv.com, tiktokcdn.com, tiktokglobalshopv.com и т.д.)
 DOMAIN-KEYWORD,tiktok
 DOMAIN-KEYWORD,byteoversea
 DOMAIN-KEYWORD,muscdn
+DOMAIN-KEYWORD,bytedance
+DOMAIN-KEYWORD,pstatp
+DOMAIN-KEYWORD,snssdk
+
+# --- Точечные суффиксы для надежности ---
+DOMAIN-SUFFIX,amemv.com
+DOMAIN-SUFFIX,bdurl.net
+DOMAIN-SUFFIX,ibytedtos.com
+DOMAIN-SUFFIX,ipstatp.com
+DOMAIN-SUFFIX,musical.ly
+DOMAIN-SUFFIX,toutiao.com
