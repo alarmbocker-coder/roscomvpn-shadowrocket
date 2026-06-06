@@ -45,6 +45,7 @@ DOMAIN_RULES = [
     ("youtube",           "geosite", "PROXY",   "youtube.list"),
     ("telegram",          "geosite", "PROXY",   "telegram.list"),
     ("github",            "geosite", "PROXY",   "github.list"),
+    ("tiktok",            "geosite", "PROXY",   "tiktok.list"),
     # DIRECT — сервисы без VPN
     ("private",           "geosite", "DIRECT",  "private-domains.list"),
     ("torrent",           "geosite", "DIRECT",  "torrent-domains.list"),
