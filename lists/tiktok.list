@@ -1,16 +1,63 @@
-# --- Жесткий перехват по ключевым словам ---
-# (Захватит tiktokv.com, tiktokcdn.com, tiktokglobalshopv.com и т.д.)
+# =========================
+# TikTok / ByteDance
+# =========================
+
+# Жёсткий перехват
 DOMAIN-KEYWORD,tiktok
 DOMAIN-KEYWORD,byteoversea
-DOMAIN-KEYWORD,muscdn
 DOMAIN-KEYWORD,bytedance
-DOMAIN-KEYWORD,pstatp
+DOMAIN-KEYWORD,muscdn
 DOMAIN-KEYWORD,snssdk
+DOMAIN-KEYWORD,pstatp
+DOMAIN-KEYWORD,ibytedtos
+DOMAIN-KEYWORD,ibyteimg
+DOMAIN-KEYWORD,byteimg
 
-# --- Точечные суффиксы для надежности ---
-DOMAIN-SUFFIX,amemv.com
-DOMAIN-SUFFIX,bdurl.net
-DOMAIN-SUFFIX,ibytedtos.com
-DOMAIN-SUFFIX,ipstatp.com
+# Основные домены TikTok
+DOMAIN-SUFFIX,tiktok.com
+DOMAIN-SUFFIX,tiktokv.com
+DOMAIN-SUFFIX,tiktokcdn.com
+DOMAIN-SUFFIX,tiktokcdn-us.com
+DOMAIN-SUFFIX,tiktokcdn-eu.com
+DOMAIN-SUFFIX,tiktokglobalshopv.com
+DOMAIN-SUFFIX,tiktokrow-cdn.com
+DOMAIN-SUFFIX,tiktok-row.net
+DOMAIN-SUFFIX,tiktokd.net
+DOMAIN-SUFFIX,tiktokd.org
+DOMAIN-SUFFIX,tik-tokapi.com
+
+# Live / Media
+DOMAIN-SUFFIX,ttlivecdn.com
+DOMAIN-SUFFIX,ttwstatic.com
+DOMAIN-SUFFIX,ttcdn-us.com
+DOMAIN-SUFFIX,muscdn.com
 DOMAIN-SUFFIX,musical.ly
+
+# ByteDance
+DOMAIN-SUFFIX,byteoversea.com
+DOMAIN-SUFFIX,byteoversea.net
+DOMAIN-SUFFIX,byteimg.com
+DOMAIN-SUFFIX,ibyteimg.com
+DOMAIN-SUFFIX,ibytedtos.com
+DOMAIN-SUFFIX,bytedapm.com
+
+# SDK / аналитика
+DOMAIN-SUFFIX,snssdk.com
+DOMAIN-SUFFIX,isnssdk.com
+DOMAIN-SUFFIX,sgpstatp.com
+DOMAIN-SUFFIX,ipstatp.com
+DOMAIN-SUFFIX,amemv.com
+DOMAIN-SUFFIX,appsflyer.com
+DOMAIN-SUFFIX,appsflyersdk.com
+
+# Дополнительно
 DOMAIN-SUFFIX,toutiao.com
+DOMAIN-SUFFIX,bdurl.net
+
+# Явные хосты
+DOMAIN,analytics.tiktok.com
+DOMAIN,api.tiktokv.com
+DOMAIN,tiktokcdn.com.akamaized.net
+DOMAIN,tiktokcdn.com.edgesuite.net
+DOMAIN,tiktokv.com.edgekey.net
+DOMAIN,tiktokv.com.edgesuite.net
