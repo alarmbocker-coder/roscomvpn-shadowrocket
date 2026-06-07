@@ -3,10 +3,11 @@
 Конвертер roscomvpn-routing → Shadowrocket .list + .conf.
 Источник правил: https://github.com/hydraponique/roscomvpn-routing
 
-Важно:
-- lists/*.list и roscomvpn.conf генерируются автоматически;
-- ручные закреплённые правила хранить в custom/my-rules.conf;
-- custom/my-rules.conf вставляется в итоговый конфиг выше DIRECT/GEOIP/IP-CIDR.
+Архитектура:
+- lists/*.list генерируются из внешних источников;
+- custom/*.list — ручные пользовательские списки;
+- custom/tiktok.list подключается отдельным RULE-SET выше DIRECT/GEOIP;
+- домены из custom/*.list не разворачиваются внутрь roscomvpn.conf.
 """
 
 import os
@@ -21,14 +22,14 @@ GEOIP_TEXT = "https://cdn.jsdelivr.net/gh/hydraponique/roscomvpn-geoip/release/t
 ROOT_DIR = os.path.join(os.path.dirname(__file__), "..")
 OUTPUT_DIR = os.path.join(ROOT_DIR, "lists")
 CONF_PATH = os.path.join(ROOT_DIR, "roscomvpn.conf")
-CUSTOM_RULES_PATH = os.path.join(ROOT_DIR, "custom", "my-rules.conf")
 
 GITHUB_REPO = os.environ.get("GITHUB_REPO", "forg-lib-lov/roscomvpn-shadowrocket")
 RAW_BASE = f"https://raw.githubusercontent.com/{GITHUB_REPO}/main/lists"
+CUSTOM_RAW_BASE = f"https://raw.githubusercontent.com/{GITHUB_REPO}/main/custom"
 CONF_URL = f"https://raw.githubusercontent.com/{GITHUB_REPO}/main/roscomvpn.conf"
 
 # Формат: (source_name, type, action, output_filename)
-# Порядок важен: REJECT → PROXY → CUSTOM → DIRECT.
+# Порядок важен: REJECT → PROXY → CUSTOM_RULE_SET → DIRECT.
 DOMAIN_RULES = [
     ("win-spy", "geosite", "REJECT", "win-spy.list"),
     ("category-ads", "geosite", "REJECT", "category-ads.list"),
@@ -37,7 +38,6 @@ DOMAIN_RULES = [
     ("youtube", "geosite", "PROXY", "youtube.list"),
     ("telegram", "geosite", "PROXY", "telegram.list"),
     ("github", "geosite", "PROXY", "github.list"),
-    ("tiktok", "geosite", "PROXY", "tiktok.list"),
 
     ("private", "geosite", "DIRECT", "private-domains.list"),
     ("torrent", "geosite", "DIRECT", "torrent-domains.list"),
@@ -56,6 +56,12 @@ DOMAIN_RULES = [
     ("category-ru", "geosite", "DIRECT", "category-ru.list"),
 ]
 
+# Пользовательские списки. Они не генерируются и не разворачиваются внутрь конфига.
+# Формат: (output_filename, action)
+CUSTOM_RULE_SETS = [
+    ("tiktok.list", "PROXY"),
+]
+
 # Формат: (source_name, type, action, output_filename, no_resolve)
 IP_RULES = [
     ("private", "geoip", "DIRECT", "private-ips.list", True),
@@ -71,21 +77,6 @@ PLAIN_URL_RULES = [
         "hxehex-whitelist.list",
     ),
 ]
-
-
-def load_custom_rules(path: str = CUSTOM_RULES_PATH) -> list[str]:
-    """Читает пользовательские закреплённые правила из custom/my-rules.conf."""
-    if not os.path.exists(path):
-        return []
-
-    rules = []
-    with open(path, encoding="utf-8") as f:
-        for raw in f.read().splitlines():
-            line = raw.strip()
-            if line:
-                rules.append(line)
-
-    return rules
 
 
 def fetch_plain_domains(url: str) -> list[str]:
@@ -179,7 +170,6 @@ def build_conf(domain_rules, ip_rules):
 
     private_ip = next((r for r in ip_rules if r[3] == "private-ips.list"), None)
     other_ip_rules = [r for r in ip_rules if r[3] != "private-ips.list"]
-    custom_rules = load_custom_rules()
 
     general = f"""# roscomvpn-shadowrocket — auto-generated {now}
 # Source: https://github.com/hydraponique/roscomvpn-routing
@@ -229,10 +219,12 @@ update-url = {CONF_URL}
     for name, rtype, act, outfile, *flags in all_rules:
         no_resolve = flags[0] if flags else False
 
-        if act == "DIRECT" and custom_rules and not custom_inserted:
+        if act == "DIRECT" and CUSTOM_RULE_SETS and not custom_inserted:
             rule_lines.append("")
-            rule_lines.append("# ═══ CUSTOM PINNED RULES (не затираются автообновлением) ═══")
-            rule_lines.extend(custom_rules)
+            rule_lines.append("# ═══ CUSTOM RULE-SETS ═════════════════════════════════")
+            for custom_outfile, custom_action in CUSTOM_RULE_SETS:
+                url = f"{CUSTOM_RAW_BASE}/{custom_outfile}"
+                rule_lines.append(f"RULE-SET,{url},{custom_action}")
             rule_lines.append("")
             custom_inserted = True
 
@@ -251,10 +243,12 @@ update-url = {CONF_URL}
         else:
             rule_lines.append(f"RULE-SET,{url},{act}")
 
-    if custom_rules and not custom_inserted:
+    if CUSTOM_RULE_SETS and not custom_inserted:
         rule_lines.append("")
-        rule_lines.append("# ═══ CUSTOM PINNED RULES (не затираются автообновлением) ═══")
-        rule_lines.extend(custom_rules)
+        rule_lines.append("# ═══ CUSTOM RULE-SETS ═════════════════════════════════")
+        for custom_outfile, custom_action in CUSTOM_RULE_SETS:
+            url = f"{CUSTOM_RAW_BASE}/{custom_outfile}"
+            rule_lines.append(f"RULE-SET,{url},{custom_action}")
         rule_lines.append("")
 
     if PLAIN_URL_RULES:
