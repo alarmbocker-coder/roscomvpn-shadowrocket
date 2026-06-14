@@ -7,6 +7,7 @@
 - lists/*.list генерируются из внешних источников;
 - custom/*.list — ручные пользовательские списки;
 - custom/tiktok.list подключается отдельным RULE-SET выше DIRECT/GEOIP;
+- custom/direct.list подключается отдельным RULE-SET в DIRECT-секции;
 - домены из custom/*.list не разворачиваются внутрь roscomvpn.conf.
 """
 
@@ -29,7 +30,7 @@ CUSTOM_RAW_BASE = f"https://raw.githubusercontent.com/{GITHUB_REPO}/main/custom"
 CONF_URL = f"https://raw.githubusercontent.com/{GITHUB_REPO}/main/roscomvpn.conf"
 
 # Формат: (source_name, type, action, output_filename)
-# Порядок важен: REJECT → PROXY → CUSTOM_RULE_SET → DIRECT.
+# Порядок важен: REJECT → PROXY → CUSTOM PROXY → CUSTOM DIRECT → DIRECT.
 DOMAIN_RULES = [
     ("win-spy", "geosite", "REJECT", "win-spy.list"),
     ("category-ads", "geosite", "REJECT", "category-ads.list"),
@@ -60,6 +61,7 @@ DOMAIN_RULES = [
 # Формат: (output_filename, action)
 CUSTOM_RULE_SETS = [
     ("tiktok.list", "PROXY"),
+    ("direct.list", "DIRECT"),
 ]
 
 # Формат: (source_name, type, action, output_filename, no_resolve)
@@ -80,7 +82,6 @@ PLAIN_URL_RULES = [
 
 
 def fetch_plain_domains(url: str) -> list[str]:
-    """Загружает plain-text домены и конвертирует их в DOMAIN-SUFFIX."""
     r = requests.get(url, timeout=30)
     if r.status_code != 200:
         print(f"  WARN: {url} → HTTP {r.status_code}")
@@ -98,7 +99,6 @@ def fetch_plain_domains(url: str) -> list[str]:
 
 
 def fetch_geosite(category: str) -> list[str]:
-    """Загружает data/<category> через GitHub API и конвертирует в Shadowrocket-строки."""
     url = GEOSITE_API.format(category)
     r = requests.get(url, timeout=30)
     if r.status_code != 200:
@@ -128,7 +128,6 @@ def fetch_geosite(category: str) -> list[str]:
 
 
 def fetch_geoip(name: str, no_resolve: bool = True) -> list[str]:
-    """Загружает release/text/<name>.txt и конвертирует CIDR в IP-CIDR строки."""
     url = GEOIP_TEXT.format(f"{name}.txt")
     r = requests.get(url, timeout=60)
     if r.status_code != 200:
@@ -163,6 +162,19 @@ def write_list(filename: str, entries: list[str], source: str):
     with open(path, "w", encoding="utf-8") as f:
         f.write("\n".join(header + entries) + "\n")
     print(f"  ✓ lists/{filename}  ({len(entries)} rules)")
+
+
+def append_custom_rule_sets(rule_lines: list[str], action: str):
+    custom_rules = [r for r in CUSTOM_RULE_SETS if r[1] == action]
+    if not custom_rules:
+        return
+
+    rule_lines.append("")
+    rule_lines.append(f"# ═══ CUSTOM {action} RULE-SETS ═════════════════════════")
+    for custom_outfile, custom_action in custom_rules:
+        url = f"{CUSTOM_RAW_BASE}/{custom_outfile}"
+        rule_lines.append(f"RULE-SET,{url},{custom_action}")
+    rule_lines.append("")
 
 
 def build_conf(domain_rules, ip_rules):
@@ -212,21 +224,21 @@ update-url = {CONF_URL}
         rule_lines.append(f"RULE-SET,{url},DIRECT,no-resolve")
         rule_lines.append("")
 
-    all_rules = domain_rules + other_ip_rules
     processed_actions = []
-    custom_inserted = False
+    custom_proxy_inserted = False
+    custom_direct_inserted = False
+    all_rules = domain_rules + other_ip_rules
 
     for name, rtype, act, outfile, *flags in all_rules:
         no_resolve = flags[0] if flags else False
 
-        if act == "DIRECT" and CUSTOM_RULE_SETS and not custom_inserted:
-            rule_lines.append("")
-            rule_lines.append("# ═══ CUSTOM RULE-SETS ═════════════════════════════════")
-            for custom_outfile, custom_action in CUSTOM_RULE_SETS:
-                url = f"{CUSTOM_RAW_BASE}/{custom_outfile}"
-                rule_lines.append(f"RULE-SET,{url},{custom_action}")
-            rule_lines.append("")
-            custom_inserted = True
+        if act == "DIRECT" and not custom_proxy_inserted:
+            append_custom_rule_sets(rule_lines, "PROXY")
+            custom_proxy_inserted = True
+
+        if act == "DIRECT" and not custom_direct_inserted:
+            append_custom_rule_sets(rule_lines, "DIRECT")
+            custom_direct_inserted = True
 
         headers = {
             "REJECT": "# ═══ BLOCK ═══════════════════════════════════════════",
@@ -243,13 +255,10 @@ update-url = {CONF_URL}
         else:
             rule_lines.append(f"RULE-SET,{url},{act}")
 
-    if CUSTOM_RULE_SETS and not custom_inserted:
-        rule_lines.append("")
-        rule_lines.append("# ═══ CUSTOM RULE-SETS ═════════════════════════════════")
-        for custom_outfile, custom_action in CUSTOM_RULE_SETS:
-            url = f"{CUSTOM_RAW_BASE}/{custom_outfile}"
-            rule_lines.append(f"RULE-SET,{url},{custom_action}")
-        rule_lines.append("")
+    if not custom_proxy_inserted:
+        append_custom_rule_sets(rule_lines, "PROXY")
+    if not custom_direct_inserted:
+        append_custom_rule_sets(rule_lines, "DIRECT")
 
     if PLAIN_URL_RULES:
         rule_lines.append("")
