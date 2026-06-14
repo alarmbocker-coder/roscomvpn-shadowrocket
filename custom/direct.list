@@ -1,26 +1,15 @@
 # =====================================================================
 # Custom DIRECT
-# Пользовательский список доменов, которые должны всегда идти напрямую.
-# Подключается в roscomvpn.conf как RULE-SET выше FINAL,PROXY.
+# Минимальный пользовательский список доменов, которые должны всегда
+# идти напрямую, но отсутствуют/не покрываются текущими авто-списками.
+# Не добавлять сюда общие .ru-домены, Яндекс, операторов и прочее,
+# если они уже закрываются category-ru / hxehex / GEOIP.
 # =====================================================================
 
-# --- Apple / App Store lookup для приложений операторов, банков и системных проверок ---
+# --- Apple / App Store lookup ---
+# Нужны для приложений операторов/банков, которые проверяют версию через App Store.
+# В текущем apple.list этих доменов нет, поэтому без этого списка они падают в FINAL,PROXY.
 DOMAIN-SUFFIX,itunes.apple.com
 DOMAIN-SUFFIX,apps.apple.com
 DOMAIN-SUFFIX,mzstatic.com
 DOMAIN-SUFFIX,aaplimg.com
-DOMAIN-SUFFIX,apple-mapkit.com
-DOMAIN-SUFFIX,app-site-association.cdn-apple.com
-
-# --- Операторы РФ ---
-DOMAIN-SUFFIX,megafon.ru
-DOMAIN-SUFFIX,mts.ru
-DOMAIN-SUFFIX,beeline.ru
-DOMAIN-SUFFIX,tele2.ru
-DOMAIN-SUFFIX,t2.ru
-
-# --- Российская аналитика, часто встроенная в приложения РФ ---
-DOMAIN-SUFFIX,vk-analytics.ru
-DOMAIN-SUFFIX,yandex.ru
-DOMAIN-SUFFIX,yandex.net
-DOMAIN-SUFFIX,yastatic.net
