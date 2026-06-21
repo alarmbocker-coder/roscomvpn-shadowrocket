@@ -18,3 +18,8 @@ DOMAIN-SUFFIX,aaplimg.com
 # Встроенные истории/баннеры в приложениях. На логах МегаФона cdn.inappstory.ru
 # уходил в FINAL,PROXY, а api.inappstory.ru шёл DIRECT по IP-CIDR.
 DOMAIN-SUFFIX,inappstory.ru
+
+# --- АЗС ГПН ---
+# Основной API и QR-сервисы приложения. Явное доменное правило не зависит
+# от смены IP-адресов gpnbonus.ru и его поддоменов.
+DOMAIN-SUFFIX,gpnbonus.ru
