@@ -1,6 +1,6 @@
 # NAME: twitch-ads.list
 # SOURCE: https://github.com/hydraponique/roscomvpn-geosite/blob/master/data/twitch-ads
-# UPDATED: 2026-06-29 10:52 UTC
+# UPDATED: 2026-06-30 09:29 UTC
 # TOTAL: 5
 
 DOMAIN-SUFFIX,gql.twitch.tv
