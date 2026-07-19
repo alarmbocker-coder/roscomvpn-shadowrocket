@@ -6,11 +6,10 @@
 # если они уже закрываются category-ru / hxehex / GEOIP.
 # =====================================================================
 
-# --- Apple / App Store lookup ---
-# Нужны для приложений операторов/банков, которые проверяют версию через App Store.
-# В текущем apple.list этих доменов нет, поэтому без этого списка они падают в FINAL,PROXY.
-DOMAIN-SUFFIX,itunes.apple.com
-DOMAIN-SUFFIX,apps.apple.com
+# --- Apple / App Store ---
+# Все поддомены Apple идут напрямую. Это закрывает App Store, iTunes lookup,
+# авторизацию, покупки и служебные API, которые иначе могут попасть в FINAL,PROXY.
+DOMAIN-SUFFIX,apple.com
 DOMAIN-SUFFIX,mzstatic.com
 DOMAIN-SUFFIX,aaplimg.com
 
