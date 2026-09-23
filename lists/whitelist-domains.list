@@ -1,6 +1,6 @@
 # NAME: whitelist-domains.list
 # SOURCE: https://github.com/hydraponique/roscomvpn-geosite/blob/master/data/whitelist
-# UPDATED: 2026-09-22 10:56 UTC
+# UPDATED: 2026-09-23 10:45 UTC
 # TOTAL: 467
 
 DOMAIN-SUFFIX,ipify.org
