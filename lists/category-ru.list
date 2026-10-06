@@ -1,11 +1,12 @@
 # NAME: category-ru.list
 # SOURCE: https://github.com/hydraponique/roscomvpn-geosite/blob/master/data/category-ru
-# UPDATED: 2026-10-05 13:34 UTC
-# TOTAL: 55
+# UPDATED: 2026-10-06 12:44 UTC
+# TOTAL: 56
 
 DOMAIN-SUFFIX,ipify.org
 DOMAIN-SUFFIX,checkip.amazonaws.com
 DOMAIN-SUFFIX,ifconfig.me
+DOMAIN-SUFFIX,api.sypexgeo.net
 DOMAIN-SUFFIX,ipapi.is
 DOMAIN-SUFFIX,iplocate.io
 DOMAIN-SUFFIX,ip.sb
