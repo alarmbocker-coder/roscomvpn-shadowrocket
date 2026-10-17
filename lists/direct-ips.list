@@ -1,6 +1,6 @@
 # NAME: direct-ips.list
 # SOURCE: https://github.com/hydraponique/roscomvpn-geoip/blob/master/release/text/direct.txt
-# UPDATED: 2026-10-16 10:40 UTC
+# UPDATED: 2026-10-17 10:07 UTC
 # TOTAL: 36707
 
 IP-CIDR,2.26.8.0/24
